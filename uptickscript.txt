@@ -1,0 +1,59 @@
+#!/bin/bash
+set -ex
+
+echo "running yum actions" >> /root/uptick.logs
+
+#update yum and install everything
+yum -y update
+yum -y install epel-release
+yum -y install nodejs
+yum -y install nginx
+yum -y install npm
+yum -y install git
+
+echo "fucking the firewall bc it is ALWAYS the network" >> /root/uptick.logs
+
+#fuck the firewall
+systemctl stop firewalld
+systemctl disable firewalld
+
+echo "starting nginx" >> /root/uptick.logs
+
+#start webserver
+systemctl start nginx
+
+echo "making uptick directory" >> /root/uptick.logs
+#configure uptick
+mkdir -p /usr/share/nginx/html
+cd /usr/share/nginx/html
+echo "downloading from github" >> /root/uptick.logs
+git clone https://github.com/mjastad/uptick.git
+
+sleep 5
+
+#get ip of host
+thishost=`ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'`
+
+#put the host ip in the node.js config file to allow node to talk
+#sed -i 's/original/new/g' /usr/share/nginx/html/upstick/js/data.js
+sed -i "s/NODE_SERVER_IP_ADDRESS/$thishost/g" /usr/share/nginx/html/uptick/js/data.js
+
+#configure database backend option
+echo "module.exports = {
+  database: {
+    type: 'mongo'
+  }
+};" > /usr/share/nginx/html/uptick/config/dbConfig.js
+
+
+#configure database backend connection settings
+echo "module.exports = {
+  host: {
+    //server url hosting mongoDB 
+    url: 'mongodb://10.21.29.113:27017'
+  }
+};" > /usr/share/nginx/html/uptick/config/mongoConfig.js
+
+cd /usr/share/nginx/html/uptick
+
+node server.js &
