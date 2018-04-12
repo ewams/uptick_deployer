@@ -1,0 +1,24 @@
+Step 1: Install wget
+	yum install wget
+
+Step 2: Hostname Change
+https://www.cyberciti.biz/faq/rhel-redhat-centos-7-change-hostname-command/
+
+	hostnamectl set-hostname Uptick_Docker_01
+	hostnamectl status
+	 
+Step 3: Setup the Netsil Collector
+  
+  1 - # Download the collectors with the command
+  wget --no-check-certificate -q -O \
+      netsil-collectors.rpm \
+      https://repo.netsil.com/stable/netsil-collectors-centos-7-x64.rpm
+
+  2 - # Install the collectors
+  rpm -i -U --replacefiles --replacepkgs netsil-collectors.rpm
+
+  3 - # Configure the collectors.
+  NETSIL_SP_HOST=mikebarmonde.netsil.com NETSIL_ORGANIZATION_ID=2d20f4cc-5cbc-41c9-ac28-f55fb85d19fb NETSIL_NICE_VALUE=15 SAMPLINGRATE=100 /opt/netsil/collectors/configure.sh
+
+  4 - # Start the collectors
+  /etc/init.d/netsil-collectors start
