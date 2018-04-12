@@ -10,6 +10,7 @@ yum -y install nodejs
 yum -y install nginx
 yum -y install npm
 yum -y install git
+yum -y install sshpass
 
 echo "fucking the firewall bc it is ALWAYS the network" >> /root/uptick.logs
 
